@@ -134,6 +134,21 @@
             50% { opacity: 0.5; }
         }
 
+        /* Language Selector */
+        .lang-select {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .lang-select:hover {
+            border-color: var(--cyan);
+        }
+
         /* Main Content */
         .main {
             max-width: 1400px;
@@ -931,6 +946,10 @@
                     <div class="live-dot"></div>
                     <span>Real-time</span>
                 </div>
+                <select id="langSelect" class="lang-select" onchange="setLanguage(this.value)">
+                    <option value="en">🇺🇸 EN</option>
+                    <option value="id">🇮🇩 ID</option>
+                </select>
             </div>
         </div>
     </header>
@@ -955,12 +974,12 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
                     </svg>
                 </div>
-                <span>StockMind v1.0 — AI-Powered Stock Prediction</span>
+                <span>StockMind v1.0 — <span id="footerTitle">${t('aiPowered')}</span></span>
             </div>
             <div class="footer-disclaimer">
-                <span>⚠️ Data provided for educational purposes only</span>
+                <span>⚠️ <span id="footerEdu">${t('dataForEdu')}</span></span>
                 <span>|</span>
-                <span>❌ Not financial advice</span>
+                <span>❌ <span id="footerAdvice">${t('notFinancialAdvice')}</span></span>
             </div>
         </div>
     </footer>
@@ -1375,6 +1394,116 @@
             });
         }
 
+        // ========== TRANSLATIONS ==========
+        const translations = {
+            en: {
+                latestData: 'Latest data',
+                loading: 'Loading...',
+                sma: 'SMA(20)',
+                ema: 'EMA(12)',
+                rsi: 'RSI(14)',
+                volume: 'Volume',
+                high: 'High',
+                low: 'Low',
+                chart: 'Chart',
+                predictions: 'Predictions',
+                analysis: 'Analysis',
+                news: 'News',
+                forecast: '7-Day Forecast',
+                targetPrice: 'Target Price',
+                expectedChange: 'Expected change',
+                confidence: 'Confidence',
+                above: 'above',
+                below: 'below',
+                confirmsBullish: 'confirms bullish momentum.',
+                suggestsBearish: 'suggests bearish pressure.',
+                indicatesConsolidation: 'indicates consolidation.',
+                overbought: 'overbought conditions, suggesting potential correction.',
+                oversold: 'oversold conditions, suggesting potential rebound opportunity.',
+                neutralRSI: 'neutral momentum with room for movement.',
+                bullish: 'bullish',
+                bearish: 'bearish',
+                mixed: 'mixed signals',
+                strongBullish: 'strong bullish trend',
+                strongBearish: 'strong bearish trend',
+                sentiment: 'Sentiment',
+                positive: 'Positive',
+                negative: 'Negative',
+                neutral: 'Neutral',
+                hoursAgo: 'hours ago',
+                lastUpdated: 'Last updated',
+                realTime: 'Real-time',
+                stockMind: 'StockMind',
+                aiPowered: 'AI-Powered Prediction',
+                dataForEdu: 'Data provided for educational purposes only',
+                notFinancialAdvice: 'Not financial advice'
+            },
+            id: {
+                latestData: 'Data Terbaru',
+                loading: 'Memuat...',
+                sma: 'SMA(20)',
+                ema: 'EMA(12)',
+                rsi: 'RSI(14)',
+                volume: 'Volume',
+                high: 'Tertinggi',
+                low: 'Terendah',
+                chart: 'Grafik',
+                predictions: 'Prediksi',
+                analysis: 'Analisis',
+                news: 'Berita',
+                forecast: 'Ramalan 7 Hari',
+                targetPrice: 'Harga Target',
+                expectedChange: 'Perubahan diharapkan',
+                confidence: 'Kepercayaan',
+                above: 'di atas',
+                below: 'di bawah',
+                confirmsBullish: 'mengkonfirmasi momentum naik.',
+                suggestsBearish: 'mengindikasikan tekanan turun.',
+                indicatesConsolidation: 'mengindikasikan konsolidasi.',
+                overbought: 'kondisi overbought, potensi koreksi.',
+                oversold: 'kondisi oversold, potensi rebound.',
+                neutralRSI: 'momentum netral dengan ruang untuk bergerak.',
+                bullish: 'naik',
+                bearish: 'turun',
+                mixed: 'sinyal campur',
+                strongBullish: 'tren naik kuat',
+                strongBearish: 'tren turun kuat',
+                sentiment: 'Sentimen',
+                positive: 'Positif',
+                negative: 'Negatif',
+                neutral: 'Netral',
+                hoursAgo: 'jam yang lalu',
+                lastUpdated: 'Terakhir diupdate',
+                realTime: 'Real-time',
+                stockMind: 'StockMind',
+                aiPowered: 'Prediksi Berbasis AI',
+                dataForEdu: 'Data disediakan untuk tujuan edukasi saja',
+                notFinancialAdvice: 'Bukan nasihat keuangan'
+            }
+        };
+
+        let currentLang = 'en';
+
+        function t(key) {
+            return translations[currentLang]?.[key] || translations.en[key] || key;
+        }
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('stockmind_lang', lang);
+            render();
+            // Update footer elements
+            const footerTitle = document.getElementById('footerTitle');
+            const footerEdu = document.getElementById('footerEdu');
+            const footerAdvice = document.getElementById('footerAdvice');
+            if (footerTitle) footerTitle.textContent = t('aiPowered');
+            if (footerEdu) footerEdu.textContent = t('dataForEdu');
+            if (footerAdvice) footerAdvice.textContent = t('notFinancialAdvice');
+            // Update header live badge
+            const liveBadge = document.querySelector('.live-badge span');
+            if (liveBadge) liveBadge.textContent = t('realTime');
+        }
+
         // ========== RENDER ==========
         let currentSymbol = 'AAPL';
         let stockData = [];
@@ -1470,42 +1599,42 @@
                             </span>
                         </div>
                     </div>
-                    <div class="update-time">Latest data: ${stockData.length > 0 ? new Date(stockData[stockData.length - 1].date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : 'Loading...'}</div>
+                    <div class="update-time">${t('latestData')}: ${stockData.length > 0 ? new Date(stockData[stockData.length - 1].date).toLocaleDateString(currentLang === 'id' ? 'id-ID' : 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : t('loading')}</div>
                 </div>
 
                 <!-- Stats Grid -->
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-label">📊 SMA(20)</div>
+                        <div class="stat-label">📊 ${t('sma')}</div>
                         <div class="stat-value cyan">${formatPrice(latestSMA, currentSymbol)}</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-label">📈 EMA(12)</div>
+                        <div class="stat-label">📈 ${t('ema')}</div>
                         <div class="stat-value amber">${formatPrice(latestEMA, currentSymbol)}</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-label">⚡ RSI(14)</div>
+                        <div class="stat-label">⚡ ${t('rsi')}</div>
                         <div class="stat-value ${latestRSI > 70 ? 'red' : latestRSI < 30 ? 'green' : 'purple'}">${latestRSI.toFixed(1)}</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-label">📊 Volume</div>
+                        <div class="stat-label">📊 ${t('volume')}</div>
                         <div class="stat-value">${(stockData[stockData.length - 1]?.volume / 1000000).toFixed(1)}M</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-label">▲ High</div>
+                        <div class="stat-label">▲ ${t('high')}</div>
                         <div class="stat-value green">${formatPrice(stockData[stockData.length - 1]?.high, currentSymbol)}</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-label">▼ Low</div>
+                        <div class="stat-label">▼ ${t('low')}</div>
                         <div class="stat-value red">${formatPrice(stockData[stockData.length - 1]?.low, currentSymbol)}</div>
                     </div>
                 </div>
 
                 <!-- Tabs -->
                 <div class="tabs">
-                    <button class="tab ${activeTab === 'chart' ? 'active' : ''}" onclick="setTab('chart')">📈 Chart</button>
-                    <button class="tab ${activeTab === 'analysis' ? 'active' : ''}" onclick="setTab('analysis')">🔍 Analysis</button>
-                    <button class="tab ${activeTab === 'news' ? 'active' : ''}" onclick="setTab('news')">📰 News</button>
+                    <button class="tab ${activeTab === 'chart' ? 'active' : ''}" onclick="setTab('chart')">📈 ${t('chart')}</button>
+                    <button class="tab ${activeTab === 'analysis' ? 'active' : ''}" onclick="setTab('analysis')">🔍 ${t('analysis')}</button>
+                    <button class="tab ${activeTab === 'news' ? 'active' : ''}" onclick="setTab('news')">📰 ${t('news')}</button>
                 </div>
 
                 <!-- Content Grid -->
@@ -1683,12 +1812,12 @@
                             </div>
 
                             <div class="forecast-box">
-                                <div class="forecast-label">🎯 7-Day Forecast</div>
+                                <div class="forecast-label">🎯 ${t('forecast')}</div>
                                 <div class="forecast-target">
-                                    Target Price: <strong>${formatPrice(predictions[6]?.predicted, currentSymbol)}</strong>
+                                    ${t('targetPrice')}: <strong>${formatPrice(predictions[6]?.predicted, currentSymbol)}</strong>
                                 </div>
                                 <div class="forecast-change">
-                                    Expected change: ${((predictions[6]?.predicted - currentPrice) / currentPrice * 100).toFixed(2)}%
+                                    ${t('expectedChange')}: ${((predictions[6]?.predicted - currentPrice) / currentPrice * 100).toFixed(2)}%
                                 </div>
                             </div>
                         </div>
@@ -1824,6 +1953,13 @@
                 console.error('symbolSelect not found');
                 return;
             }
+
+            // Load saved language
+            const savedLang = localStorage.getItem('stockmind_lang');
+            if (savedLang && translations[savedLang]) {
+                currentLang = savedLang;
+                document.getElementById('langSelect').value = savedLang;
+            }
             
             symbolSelect.addEventListener('change', async (e) => {
                 currentSymbol = e.target.value;
@@ -1838,6 +1974,9 @@
             // Hide loading indicator
             const loading = document.getElementById('loadingIndicator');
             if (loading) loading.style.display = 'none';
+
+            // Apply initial language to static elements
+            setLanguage(currentLang);
         }
 
         // Run init
