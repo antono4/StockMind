@@ -992,40 +992,88 @@
             'ADRO': 'Adaro Energy',
             'INDY': 'Indika Energy',
             'PGAS': 'PGN Nusantara',
-            'PERTAMINA': 'Pertamina',
-            'BUMN': 'Bank BTN',
             'SMGR': 'Semen Indonesia',
             'JSMR': 'Jasa Marga',
-            'WIKA': 'Waskita Karya',
-            'PTPP': 'PP (Pesona)",
-            'GIAA': 'Garuda Indonesia',
             'CPIN': 'Charoen Pokphand',
             'ICBP': 'Indofood CBP',
             'INDF': 'Indofood',
             'KLBF': 'Kalbe Farma',
-            'NRCA': 'Nusa Raya',
             'ISAT': 'Indosat',
             'EXCL': 'XL Axiata',
-            'FREN': 'SmartFren',
             'MAPI': 'Matahari'
         };
 
-        // Price ranges for different markets
+        // Yahoo Finance symbol mapping (.JK for Indonesia)
+        const yahooSymbols = {
+            'AAPL': 'AAPL', 'GOOGL': 'GOOGL', 'MSFT': 'MSFT', 'AMZN': 'AMZN',
+            'TSLA': 'TSLA', 'NVDA': 'NVDA', 'META': 'META', 'NFLX': 'NFLX',
+            'BBCA': 'BBCA.JK', 'BBRI': 'BBRI.JK', 'BMRI': 'BMRI.JK',
+            'BBNI': 'BBNI.JK', 'TLKM': 'TLKM.JK', 'ASII': 'ASII.JK',
+            'UNTR': 'UNTR.JK', 'UNVR': 'UNVR.JK', 'HMSP': 'HMSP.JK',
+            'GGRM': 'GGRM.JK', 'PTBA': 'PTBA.JK', 'ADRO': 'ADRO.JK',
+            'INDY': 'INDY.JK', 'PGAS': 'PGAS.JK', 'SMGR': 'SMGR.JK',
+            'JSMR': 'JSMR.JK', 'CPIN': 'CPIN.JK', 'ICBP': 'ICBP.JK',
+            'INDF': 'INDF.JK', 'KLBF': 'KLBF.JK', 'ISAT': 'ISAT.JK',
+            'EXCL': 'EXCL.JK', 'MAPI': 'MAPI.JK'
+        };
+
+        // Price ranges for fallback
         const priceRanges = {
-            // US Stocks (USD)
             'AAPL': [150, 200], 'GOOGL': [120, 180], 'MSFT': [300, 400], 
             'AMZN': [130, 180], 'TSLA': [200, 350], 'NVDA': [400, 900],
             'META': [300, 500], 'NFLX': [350, 600],
-            // Indonesian Stocks (IDR in thousands - displayed as actual price)
             'BBCA': [8000, 12000], 'BBRI': [4000, 7000], 'BMRI': [5000, 9000],
             'BBNI': [4000, 8000], 'TLKM': [2500, 5000], 'ASII': [4000, 8000],
             'UNTR': [18000, 35000], 'UNVR': [3500, 6000], 'HMSP': [1500, 3500],
             'GGRM': [20000, 50000], 'PTBA': [8000, 18000], 'ADRO': [10000, 25000],
             'INDY': [10000, 25000], 'PGAS': [800, 2000], 'SMGR': [4000, 9000],
-            'JSMR': [2000, 6000], 'WIKA': [200, 800], 'CPIN': [4000, 8000],
-            'ICBP': [8000, 15000], 'INDF': [5000, 10000], 'KLBF': [1000, 2500],
-            'ISAT': [500, 1500], 'EXCL': [200, 600], 'MAPI': [500, 1500]
+            'JSMR': [2000, 6000], 'CPIN': [4000, 8000], 'ICBP': [8000, 15000],
+            'INDF': [5000, 10000], 'KLBF': [1000, 2500], 'ISAT': [500, 1500],
+            'EXCL': [200, 600], 'MAPI': [500, 1500]
         };
+
+        // Fetch real data from Yahoo Finance API
+        async function fetchRealData(symbol, days = 120) {
+            const yahooSymbol = yahooSymbols[symbol] || symbol;
+            const rangeMap = { 30: '1mo', 60: '2mo', 90: '3mo', 120: '3mo', 180: '6mo' };
+            const range = rangeMap[days] || '3mo';
+            
+            try {
+                const url = `https://query1.finance.yahoo.com/v8/finance/chart/${yahooSymbol}?interval=1d&range=${range}`;
+                const response = await fetch(url, {
+                    headers: { 'Accept': 'application/json' }
+                });
+                
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const json = await response.json();
+                const result = json.chart?.result?.[0];
+                if (!result) throw new Error('No data');
+                
+                const timestamps = result.timestamp || [];
+                const quotes = result.indicators?.quote?.[0] || {};
+                
+                const data = [];
+                for (let i = 0; i < timestamps.length; i++) {
+                    if (quotes.close?.[i] != null) {
+                        data.push({
+                            date: new Date(timestamps[i] * 1000).toISOString().split('T')[0],
+                            open: quotes.open?.[i] || quotes.close[i],
+                            high: quotes.high?.[i] || quotes.close[i],
+                            low: quotes.low?.[i] || quotes.close[i],
+                            close: quotes.close[i],
+                            volume: quotes.volume?.[i] || 0
+                        });
+                    }
+                }
+                
+                return data.slice(-Math.min(data.length, days));
+                
+            } catch (error) {
+                console.warn('Yahoo Finance unavailable, using mock data');
+                return generateMockData(days, symbol);
+            }
+        }
 
         function generateMockData(days = 120, symbol = 'AAPL') {
             const data = [];
@@ -1336,8 +1384,12 @@
         let rsi = [];
         let activeTab = 'chart';
 
-        function loadData() {
-            stockData = generateMockData(120, currentSymbol);
+        async function loadData() {
+            try {
+                stockData = await fetchRealData(currentSymbol, 120);
+            } catch (e) {
+                stockData = generateMockData(120, currentSymbol);
+            }
             sma = calculateSMA(stockData.map(d => d.close), 20);
             ema = calculateEMA(stockData.map(d => d.close), 12);
             rsi = calculateRSI(stockData.map(d => d.close));
@@ -1766,21 +1818,21 @@
         }
 
         // ========== INIT ==========
-        function init() {
+        async function init() {
             const symbolSelect = document.getElementById('symbolSelect');
             if (!symbolSelect) {
                 console.error('symbolSelect not found');
                 return;
             }
             
-            symbolSelect.addEventListener('change', (e) => {
+            symbolSelect.addEventListener('change', async (e) => {
                 currentSymbol = e.target.value;
-                loadData();
+                await loadData();
                 render();
             });
 
-            // Initial load
-            loadData();
+            // Initial load with real data
+            await loadData();
             render();
 
             // Hide loading indicator
