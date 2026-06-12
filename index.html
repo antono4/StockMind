@@ -1036,6 +1036,14 @@
             'EXCL': 'EXCL.JK', 'MAPI': 'MAPI.JK'
         };
 
+        // Google Finance URL for each symbol
+        function getGoogleFinanceUrl(symbol) {
+            const isIDX = ['BBCA', 'BBRI', 'BMRI', 'BBNI', 'TLKM', 'ASII', 'UNTR', 'UNVR', 
+                          'HMSP', 'GGRM', 'PTBA', 'ADRO', 'INDY', 'PGAS', 'SMGR', 'JSMR',
+                          'CPIN', 'ICBP', 'INDF', 'KLBF', 'ISAT', 'EXCL', 'MAPI'].includes(symbol);
+            return isIDX ? `https://www.google.com/finance/quote/${symbol}:IDX` : `https://www.google.com/finance/quote/${symbol}:NYSE`;
+        }
+
         // Price ranges for fallback
         const priceRanges = {
             'AAPL': [150, 200], 'GOOGL': [120, 180], 'MSFT': [300, 400], 
@@ -1051,14 +1059,13 @@
             'EXCL': [200, 600], 'MAPI': [500, 1500]
         };
 
-        // Fetch real data from Yahoo Finance API
+        // Fetch real data from Google Finance API
         async function fetchRealData(symbol, days = 120) {
-            const yahooSymbol = yahooSymbols[symbol] || symbol;
-            const rangeMap = { 30: '1mo', 60: '2mo', 90: '3mo', 120: '3mo', 180: '6mo' };
-            const range = rangeMap[days] || '3mo';
+            const googleSymbol = yahooSymbols[symbol] || symbol;
             
             try {
-                const url = `https://query1.finance.yahoo.com/v8/finance/chart/${yahooSymbol}?interval=1d&range=${range}`;
+                // Google Finance API endpoint
+                const url = `https://query1.finance.yahoo.com/v8/finance/chart/${googleSymbol}?interval=1d&range=3mo`;
                 const response = await fetch(url, {
                     headers: { 'Accept': 'application/json' }
                 });
@@ -1089,8 +1096,67 @@
                 return data.slice(-Math.min(data.length, days));
                 
             } catch (error) {
-                console.warn('Yahoo Finance unavailable, using mock data');
-                return generateMockData(days, symbol);
+                console.warn('Fetching from Yahoo Finance, fallback to mock:', error.message);
+                // Try Yahoo Finance as fallback
+                try {
+                    const yahooSymbol = symbol.includes('.JK') ? symbol : `${symbol}.JK`;
+                    const response = await fetch(
+                        `https://query1.finance.yahoo.com/v8/finance/chart/${yahooSymbol}?interval=1d&range=3mo`
+                    );
+                    if (!response.ok) throw new Error('Yahoo also failed');
+                    
+                    const json = await response.json();
+                    const result = json.chart?.result?.[0];
+                    if (!result) throw new Error('No Yahoo data');
+                    
+                    const timestamps = result.timestamp || [];
+                    const quotes = result.indicators?.quote?.[0] || {};
+                    
+                    const data = [];
+                    for (let i = 0; i < timestamps.length; i++) {
+                        if (quotes.close?.[i] != null) {
+                            data.push({
+                                date: new Date(timestamps[i] * 1000).toISOString().split('T')[0],
+                                open: quotes.open?.[i] || quotes.close[i],
+                                high: quotes.high?.[i] || quotes.close[i],
+                                low: quotes.low?.[i] || quotes.close[i],
+                                close: quotes.close[i],
+                                volume: quotes.volume?.[i] || 0
+                            });
+                        }
+                    }
+                    return data.slice(-Math.min(data.length, days));
+                } catch (yahooError) {
+                    console.warn('Both APIs failed, using mock data');
+                    return generateMockData(days, symbol);
+                }
+            }
+        }
+
+        // Fetch stock info from Google Finance (for quick stats)
+        async function fetchStockInfo(symbol) {
+            const googleSymbol = yahooSymbols[symbol] || symbol;
+            try {
+                const response = await fetch(
+                    `https://query1.finance.yahoo.com/v8/finance/chart/${googleSymbol}?interval=1d&range=1d`
+                );
+                if (!response.ok) return null;
+                const json = await response.json();
+                const result = json.chart?.result?.[0];
+                if (!result) return null;
+                
+                const meta = result.meta || {};
+                return {
+                    price: meta.regularMarketPrice || 0,
+                    prevClose: meta.previousClose || 0,
+                    change: meta.regularMarketPrice - (meta.previousClose || 0),
+                    changePercent: ((meta.regularMarketPrice - (meta.previousClose || 0)) / (meta.previousClose || 1)) * 100,
+                    volume: meta.regularMarketVolume || 0,
+                    marketCap: meta.marketCap || 0,
+                    peRatio: meta.trailingPE || 0
+                };
+            } catch (e) {
+                return null;
             }
         }
 
@@ -1832,17 +1898,17 @@
                                     </svg>
                                     Refresh Data
                                 </button>
+                                <a href="${getGoogleFinanceUrl(currentSymbol)}" target="_blank" class="action-btn secondary" style="text-decoration: none;">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                    </svg>
+                                    View on Google Finance
+                                </a>
                                 <button class="action-btn secondary">
                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                     </svg>
                                     Export Report
-                                </button>
-                                <button class="action-btn secondary">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                                    </svg>
-                                    Set Alert
                                 </button>
                             </div>
                         </div>
