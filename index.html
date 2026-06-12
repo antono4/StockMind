@@ -929,7 +929,7 @@
                 </select>
                 <div class="live-badge">
                     <div class="live-dot"></div>
-                    <span>Live Data</span>
+                    <span>Real-time</span>
                 </div>
             </div>
         </div>
@@ -1030,10 +1030,20 @@
             const data = [];
             const range = priceRanges[symbol] || [150, 200];
             let price = range[0] + Math.random() * (range[1] - range[0]);
+            
+            // Use current date as the latest data point (real-time simulation)
             const now = new Date();
+            // Set time to market close (16:00 EST = around 22:00 UTC)
+            now.setHours(22, 0, 0, 0);
 
             for (let i = days; i >= 0; i--) {
                 const date = new Date(now);
+                // Skip weekends for more realistic data
+                let dayOfWeek = date.getDay();
+                while (dayOfWeek === 0 || dayOfWeek === 6) {
+                    date.setDate(date.getDate() - 1);
+                    dayOfWeek = date.getDay();
+                }
                 date.setDate(date.getDate() - i);
 
                 const change = (Math.random() - 0.48) * 5;
@@ -1112,11 +1122,16 @@
 
         function generatePrediction(data) {
             const lastPrice = data[data.length - 1].close;
+            const lastDate = new Date(data[data.length - 1].date);
             const predictions = [];
 
             for (let i = 1; i <= 7; i++) {
-                const date = new Date();
+                const date = new Date(lastDate);
                 date.setDate(date.getDate() + i);
+                // Skip weekends for predictions too
+                while (date.getDay() === 0 || date.getDay() === 6) {
+                    date.setDate(date.getDate() + 1);
+                }
 
                 const trend = data.slice(-14).reduce((acc, d, idx, arr) => {
                     return acc + (idx > 0 ? (d.close - arr[idx - 1].close) : 0);
@@ -1402,7 +1417,7 @@
                             </span>
                         </div>
                     </div>
-                    <div class="update-time">Last updated: ${new Date().toLocaleTimeString()}</div>
+                    <div class="update-time">Latest data: ${stockData.length > 0 ? new Date(stockData[stockData.length - 1].date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : 'Loading...'}</div>
                 </div>
 
                 <!-- Stats Grid -->
@@ -1597,7 +1612,7 @@
                                     const isPositive = change >= 0;
                                     return `
                                         <div class="prediction-card">
-                                            <div class="prediction-date">${pred.date}</div>
+                                            <div class="prediction-date">${new Date(pred.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', weekday: 'short' })}</div>
                                             <div class="prediction-price">${formatPrice(pred.predicted, currentSymbol)}</div>
                                             <div class="prediction-change ${isPositive ? 'positive' : 'negative'}">
                                                 ${isPositive ? '↑' : '↓'} ${Math.abs(change).toFixed(2)}%
@@ -1719,6 +1734,34 @@
         function refreshData() {
             loadData();
             render();
+        }
+
+        // Auto-refresh every minute to update to current date
+        setInterval(() => {
+            const lastDataDate = stockData.length > 0 ? new Date(stockData[stockData.length - 1].date) : null;
+            const today = new Date();
+            today.setHours(22, 0, 0, 0);
+            
+            if (!lastDataDate || lastDataDate.toDateString() !== today.toDateString()) {
+                loadData();
+                render();
+            }
+        }, 60000); // Check every minute
+
+        // Get last trading day (skip weekends)
+        function getLastTradingDay() {
+            const today = new Date();
+            today.setHours(22, 0, 0, 0);
+            
+            // If it's weekend, go back to Friday
+            const dayOfWeek = today.getDay();
+            if (dayOfWeek === 0) { // Sunday
+                today.setDate(today.getDate() - 2);
+            } else if (dayOfWeek === 6) { // Saturday
+                today.setDate(today.getDate() - 1);
+            }
+            
+            return today;
         }
 
         // ========== INIT ==========
