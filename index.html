@@ -890,14 +890,42 @@
             </div>
             <div class="header-actions">
                 <select id="symbolSelect" class="symbol-select">
-                    <option value="AAPL">AAPL</option>
-                    <option value="GOOGL">GOOGL</option>
-                    <option value="MSFT">MSFT</option>
-                    <option value="AMZN">AMZN</option>
-                    <option value="TSLA">TSLA</option>
-                    <option value="NVDA">NVDA</option>
-                    <option value="META">META</option>
-                    <option value="NFLX">NFLX</option>
+                    <optgroup label="🇺🇸 US Stocks">
+                        <option value="AAPL">AAPL - Apple Inc.</option>
+                        <option value="GOOGL">GOOGL - Alphabet</option>
+                        <option value="MSFT">MSFT - Microsoft</option>
+                        <option value="AMZN">AMZN - Amazon</option>
+                        <option value="TSLA">TSLA - Tesla</option>
+                        <option value="NVDA">NVDA - NVIDIA</option>
+                        <option value="META">META - Meta</option>
+                        <option value="NFLX">NFLX - Netflix</option>
+                    </optgroup>
+                    <optgroup label="🇮🇩 Indonesian Stocks (IDX)">
+                        <option value="BBCA">BBCA - Bank Central Asia</option>
+                        <option value="BBRI">BBRI - Bank Rakyat Indonesia</option>
+                        <option value="BMRI">BMRI - Bank Mandiri</option>
+                        <option value="BBNI">BBNI - Bank Negara Indonesia</option>
+                        <option value="TLKM">TLKM - Telkom Indonesia</option>
+                        <option value="ASII">ASII - Astra International</option>
+                        <option value="UNTR">UNTR - United Tractors</option>
+                        <option value="UNVR">UNVR - Unilever Indonesia</option>
+                        <option value="HMSP">HMSP - H.M. Sampoerna</option>
+                        <option value="GGRM">GGRM - Gudang Garam</option>
+                        <option value="PTBA">PTBA - Bukit Asam</option>
+                        <option value="ADRO">ADRO - Adaro Energy</option>
+                        <option value="INDY">INDY - Indika Energy</option>
+                        <option value="PGAS">PGAS - PGN</option>
+                        <option value="SMGR">SMGR - Semen Indonesia</option>
+                        <option value="JSMR">JSMR - Jasa Marga</option>
+                        <option value="WIKA">WIKA - Waskita Karya</option>
+                        <option value="CPIN">CPIN - Charoen Pokphand</option>
+                        <option value="ICBP">ICBP - Indofood CBP</option>
+                        <option value="INDF">INDF - Indofood</option>
+                        <option value="KLBF">KLBF - Kalbe Farma</option>
+                        <option value="ISAT">ISAT - Indosat</option>
+                        <option value="EXCL">EXCL - XL Axiata</option>
+                        <option value="MAPI">MAPI - Matahari</option>
+                    </optgroup>
                 </select>
                 <div class="live-badge">
                     <div class="live-dot"></div>
@@ -939,6 +967,7 @@
     <script>
         // ========== DATA GENERATION ==========
         const companyNames = {
+            // US Stocks
             'AAPL': 'Apple Inc.',
             'GOOGL': 'Alphabet Inc.',
             'MSFT': 'Microsoft Corp.',
@@ -946,12 +975,61 @@
             'TSLA': 'Tesla Inc.',
             'NVDA': 'NVIDIA Corp.',
             'META': 'Meta Platforms Inc.',
-            'NFLX': 'Netflix Inc.'
+            'NFLX': 'Netflix Inc.',
+            // Indonesian Stocks (IDX)
+            'BBCA': 'Bank Central Asia',
+            'BBRI': 'Bank Rakyat Indonesia',
+            'BMRI': 'Bank Mandiri',
+            'BBNI': 'Bank Negara Indonesia',
+            'TLKM': 'Telkom Indonesia',
+            'ASII': 'Astra International',
+            'UNTR': 'United Tractors',
+            'UNVR': 'Unilever Indonesia',
+            'HMSP': 'H.M. Sampoerna',
+            'GGRM': 'Gudang Garam',
+            'PTBA': 'Bumi Bara Bukit Asam',
+            'ADRO': 'Adaro Energy',
+            'INDY': 'Indika Energy',
+            'PGAS': 'PGN Nusantara',
+            'PERTAMINA': 'Pertamina',
+            'BUMN': 'Bank BTN',
+            'SMGR': 'Semen Indonesia',
+            'JSMR': 'Jasa Marga',
+            'WIKA': 'Waskita Karya',
+            'PTPP': 'PP (Pesona)",
+            'GIAA': 'Garuda Indonesia',
+            'CPIN': 'Charoen Pokphand',
+            'ICBP': 'Indofood CBP',
+            'INDF': 'Indofood',
+            'KLBF': 'Kalbe Farma',
+            'NRCA': 'Nusa Raya',
+            'ISAT': 'Indosat',
+            'EXCL': 'XL Axiata',
+            'FREN': 'SmartFren',
+            'MAPI': 'Matahari'
         };
 
-        function generateMockData(days = 120) {
+        // Price ranges for different markets
+        const priceRanges = {
+            // US Stocks (USD)
+            'AAPL': [150, 200], 'GOOGL': [120, 180], 'MSFT': [300, 400], 
+            'AMZN': [130, 180], 'TSLA': [200, 350], 'NVDA': [400, 900],
+            'META': [300, 500], 'NFLX': [350, 600],
+            // Indonesian Stocks (IDR in thousands - displayed as actual price)
+            'BBCA': [8000, 12000], 'BBRI': [4000, 7000], 'BMRI': [5000, 9000],
+            'BBNI': [4000, 8000], 'TLKM': [2500, 5000], 'ASII': [4000, 8000],
+            'UNTR': [18000, 35000], 'UNVR': [3500, 6000], 'HMSP': [1500, 3500],
+            'GGRM': [20000, 50000], 'PTBA': [8000, 18000], 'ADRO': [10000, 25000],
+            'INDY': [10000, 25000], 'PGAS': [800, 2000], 'SMGR': [4000, 9000],
+            'JSMR': [2000, 6000], 'WIKA': [200, 800], 'CPIN': [4000, 8000],
+            'ICBP': [8000, 15000], 'INDF': [5000, 10000], 'KLBF': [1000, 2500],
+            'ISAT': [500, 1500], 'EXCL': [200, 600], 'MAPI': [500, 1500]
+        };
+
+        function generateMockData(days = 120, symbol = 'AAPL') {
             const data = [];
-            let price = 150 + Math.random() * 50;
+            const range = priceRanges[symbol] || [150, 200];
+            let price = range[0] + Math.random() * (range[1] - range[0]);
             const now = new Date();
 
             for (let i = days; i >= 0; i--) {
@@ -1093,7 +1171,9 @@
                 const price = maxPrice - (priceRange * i) / 4;
                 ctx.fillStyle = '#64748b';
                 ctx.font = '10px JetBrains Mono, monospace';
-                ctx.fillText('$' + price.toFixed(2), width - padding.right + 5, y + 3);
+                const currency = getCurrency(currentSymbol);
+                const label = currency === 'IDR' ? 'Rp' : '$';
+                ctx.fillText(label + price.toFixed(0), width - padding.right + 5, y + 3);
             }
 
             // EMA line
@@ -1241,7 +1321,7 @@
         let activeTab = 'chart';
 
         function loadData() {
-            stockData = generateMockData(120);
+            stockData = generateMockData(120, currentSymbol);
             sma = calculateSMA(stockData.map(d => d.close), 20);
             ema = calculateEMA(stockData.map(d => d.close), 12);
             rsi = calculateRSI(stockData.map(d => d.close));
@@ -1250,6 +1330,21 @@
 
         function formatNumber(num) {
             return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        function getCurrency(symbol) {
+            const idrStocks = ['BBCA', 'BBRI', 'BMRI', 'BBNI', 'TLKM', 'ASII', 'UNTR', 'UNVR', 
+                             'HMSP', 'GGRM', 'PTBA', 'ADRO', 'INDY', 'PGAS', 'SMGR', 'JSMR', 
+                             'WIKA', 'CPIN', 'ICBP', 'INDF', 'KLBF', 'ISAT', 'EXCL', 'MAPI'];
+            return idrStocks.includes(symbol) ? 'IDR' : 'USD';
+        }
+
+        function formatPrice(price, symbol) {
+            const currency = getCurrency(symbol);
+            if (currency === 'IDR') {
+                return 'Rp ' + formatNumber(Math.round(price));
+            }
+            return '$' + price.toFixed(2);
         }
 
         function render() {
@@ -1301,9 +1396,9 @@
                             <span class="company-badge">${companyNames[currentSymbol]}</span>
                         </h1>
                         <div class="price-display">
-                            <span class="current-price">$${currentPrice.toFixed(2)}</span>
+                            <span class="current-price">${formatPrice(currentPrice, currentSymbol)}</span>
                             <span class="price-change ${priceChange >= 0 ? 'positive' : 'negative'}">
-                                ${priceChange >= 0 ? '▲' : '▼'} ${Math.abs(priceChange).toFixed(2)} (${Math.abs(priceChangePercent).toFixed(2)}%)
+                                ${priceChange >= 0 ? '▲' : '▼'} ${formatPrice(Math.abs(priceChange), currentSymbol)} (${Math.abs(priceChangePercent).toFixed(2)}%)
                             </span>
                         </div>
                     </div>
@@ -1314,11 +1409,11 @@
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-label">📊 SMA(20)</div>
-                        <div class="stat-value cyan">$${latestSMA.toFixed(2)}</div>
+                        <div class="stat-value cyan">${formatPrice(latestSMA, currentSymbol)}</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-label">📈 EMA(12)</div>
-                        <div class="stat-value amber">$${latestEMA.toFixed(2)}</div>
+                        <div class="stat-value amber">${formatPrice(latestEMA, currentSymbol)}</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-label">⚡ RSI(14)</div>
@@ -1330,11 +1425,11 @@
                     </div>
                     <div class="stat-card">
                         <div class="stat-label">▲ High</div>
-                        <div class="stat-value green">$${stockData[stockData.length - 1]?.high.toFixed(2)}</div>
+                        <div class="stat-value green">${formatPrice(stockData[stockData.length - 1]?.high, currentSymbol)}</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-label">▼ Low</div>
-                        <div class="stat-value red">$${stockData[stockData.length - 1]?.low.toFixed(2)}</div>
+                        <div class="stat-value red">${formatPrice(stockData[stockData.length - 1]?.low, currentSymbol)}</div>
                     </div>
                 </div>
 
@@ -1453,9 +1548,9 @@
                                         ${rsiText}
                                     </p>
                                     <p class="summary-text">
-                                        The current price of <span class="white"><strong>$${currentPrice.toFixed(2)}</strong></span> is 
-                                        ${currentPrice > latestSMA ? 'above' : 'below'} the 20-day SMA ($${latestSMA.toFixed(2)}), 
-                                        confirming the short-term trend direction. EMA(12) at $${latestEMA.toFixed(2)} 
+                                        The current price of <span class="white"><strong>${formatPrice(currentPrice, currentSymbol)}</strong></span> is 
+                                        ${currentPrice > latestSMA ? 'above' : 'below'} the 20-day SMA (${formatPrice(latestSMA, currentSymbol)}), 
+                                        confirming the short-term trend direction. EMA(12) at ${formatPrice(latestEMA, currentSymbol)} 
                                         ${latestEMA > latestSMA ? 'confirms bullish momentum.' : latestEMA < latestSMA ? 'suggests bearish pressure.' : 'indicates consolidation.'}
                                     </p>
                                 </div>
@@ -1503,7 +1598,7 @@
                                     return `
                                         <div class="prediction-card">
                                             <div class="prediction-date">${pred.date}</div>
-                                            <div class="prediction-price">$${pred.predicted.toFixed(2)}</div>
+                                            <div class="prediction-price">${formatPrice(pred.predicted, currentSymbol)}</div>
                                             <div class="prediction-change ${isPositive ? 'positive' : 'negative'}">
                                                 ${isPositive ? '↑' : '↓'} ${Math.abs(change).toFixed(2)}%
                                             </div>
@@ -1522,7 +1617,7 @@
                             <div class="forecast-box">
                                 <div class="forecast-label">🎯 7-Day Forecast</div>
                                 <div class="forecast-target">
-                                    Target Price: <strong>$${predictions[6]?.predicted.toFixed(2)}</strong>
+                                    Target Price: <strong>${formatPrice(predictions[6]?.predicted, currentSymbol)}</strong>
                                 </div>
                                 <div class="forecast-change">
                                     Expected change: ${((predictions[6]?.predicted - currentPrice) / currentPrice * 100).toFixed(2)}%
@@ -1598,10 +1693,10 @@
                                 tooltip.innerHTML = `
                                     <div class="tooltip-date">${candle.date}</div>
                                     <div class="tooltip-grid">
-                                        <span class="tooltip-label">O:</span> <span class="tooltip-value">$${candle.open.toFixed(2)}</span>
-                                        <span class="tooltip-label">H:</span> <span class="tooltip-value green">$${candle.high.toFixed(2)}</span>
-                                        <span class="tooltip-label">L:</span> <span class="tooltip-value red">$${candle.low.toFixed(2)}</span>
-                                        <span class="tooltip-label">C:</span> <span class="tooltip-value">$${candle.close.toFixed(2)}</span>
+                                        <span class="tooltip-label">O:</span> <span class="tooltip-value">${formatPrice(candle.open, currentSymbol)}</span>
+                                        <span class="tooltip-label">H:</span> <span class="tooltip-value green">${formatPrice(candle.high, currentSymbol)}</span>
+                                        <span class="tooltip-label">L:</span> <span class="tooltip-value red">${formatPrice(candle.low, currentSymbol)}</span>
+                                        <span class="tooltip-label">C:</span> <span class="tooltip-value">${formatPrice(candle.close, currentSymbol)}</span>
                                     </div>
                                 `;
                                 tooltip.classList.add('visible');
