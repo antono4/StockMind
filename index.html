@@ -937,7 +937,13 @@
 
     <!-- Main Content -->
     <main class="main" id="mainContent">
-        <!-- Content loaded immediately via JavaScript -->
+        <!-- Loading indicator -->
+        <div id="loadingIndicator" style="display: flex; align-items: center; justify-content: center; height: 400px; color: #64748b;">
+            <div style="text-align: center;">
+                <div class="spinner" style="width: 40px; height: 40px; border: 3px solid #1f2937; border-top-color: #06b6d4; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px;"></div>
+                <span>Loading market data...</span>
+            </div>
+        </div>
     </main>
 
     <!-- Footer -->
@@ -1760,15 +1766,34 @@
         }
 
         // ========== INIT ==========
-        document.getElementById('symbolSelect').addEventListener('change', (e) => {
-            currentSymbol = e.target.value;
+        function init() {
+            const symbolSelect = document.getElementById('symbolSelect');
+            if (!symbolSelect) {
+                console.error('symbolSelect not found');
+                return;
+            }
+            
+            symbolSelect.addEventListener('change', (e) => {
+                currentSymbol = e.target.value;
+                loadData();
+                render();
+            });
+
+            // Initial load
             loadData();
             render();
-        });
 
-        // Initial load (immediate, no loading screen)
-        loadData();
-        render();
+            // Hide loading indicator
+            const loading = document.getElementById('loadingIndicator');
+            if (loading) loading.style.display = 'none';
+        }
+
+        // Run init
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
 
         // Responsive resize
         window.addEventListener('resize', () => {
