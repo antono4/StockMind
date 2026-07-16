@@ -1,5 +1,8 @@
 # StockMind - AI-Powered Stock Prediction Tool
 
+> **Created by Antono**
+
+
 ![StockMind](https://img.shields.io/badge/StockMind-v1.0-cyan)
 ![Next.js](https://img.shields.io/badge/Next.js-14-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue)
